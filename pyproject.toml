@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "aibox-nlp"
+name = "aibox-data-lake"
 authors = [{name = "AiBox Lab"}]
 maintainers = [{name = "Moésio Filho", email = "moesio.f@gmail.com"}]
 version = "0.0.1"
@@ -12,10 +12,15 @@ readme = "README.md"
 classifiers = ["Programming Language :: Python :: 3.12", "Programming Language :: Python :: 3.13", "Development Status :: 3 - Alpha"]
 requires-python = ">=3.12"
 dependencies = [
+    "google-cloud-storage>=3.3.1",
+    "pandas>=2.3.2",
     "platformdirs>=4.4.0",
+    "pyarrow>=21.0.0",
     "pydantic>=2.11.7",
     "pydantic-settings>=2.10.1",
+    "rich>=14.1.0",
     "smart-open[gcs,s3]>=7.3.1",
+    "typer>=0.17.4",
     "uv>=0.8.15",
 ]
 
@@ -30,3 +35,12 @@ Changelog = "https://github.com/aiboxlab/data-lake/blob/main/CHANGELOG.md"
 where = ["src"]
 include = ["aibox*"]
 namespaces = true
+
+[project.scripts]
+aibox-dl = "aibox.data_lake.cli.main:cli"
+
+[dependency-groups]
+dev = [
+    "ipython>=9.5.0",
+    "pre-commit>=4.3.0",
+]
