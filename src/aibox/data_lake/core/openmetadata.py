@@ -16,9 +16,7 @@ class PartitionColumn(BaseModel):
     """
 
     name: str = Field(description="Local name (not fully qualified) of the column.")
-    dataType: str = Field(
-        description="Data type of the column (e.g., INT, STRING, etc.)."
-    )
+    dataType: str = Field(description="Data type of the column (e.g., INT, STRING, etc.).")
     displayName: Optional[str] = Field(None, description="Display name for the column.")
 
 
@@ -33,19 +31,16 @@ class MetadataEntry(BaseModel):
     )
     structureFormat: Optional[str] = Field(
         None,
-        description="What’s the schema format for the container, e.g. "
-        "avro, parquet, csv.",
+        description="What’s the schema format for the container, e.g. " "avro, parquet, csv.",
     )
     unstructuredFormats: Optional[list[str]] = Field(
         None,
-        description="What unstructured formats you want to ingest, "
-        "e.g. png, pdf, jpg.",
+        description="What unstructured formats you want to ingest, " "e.g. png, pdf, jpg.",
     )
     depth: int = Field(0, description="Depth of the data path in the container")
     separator: Optional[str] = Field(
         None,
-        description="For delimited files such as CSV, what is the "
-        "separator being used?",
+        description="For delimited files such as CSV, what is the " "separator being used?",
     )
     isPartitioned: bool = Field(
         False,

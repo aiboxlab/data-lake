@@ -37,9 +37,9 @@ class Config(BaseSettings):
         Returns:
             Path: path to configuration file.
         """
-        return Path(
-            platformdirs.user_config_dir(appname="data_lake", appauthor="aibox")
-        ).joinpath("config.json")
+        return Path(platformdirs.user_config_dir(appname="data_lake", appauthor="aibox")).joinpath(
+            "config.json"
+        )
 
     @classmethod
     def settings_customise_sources(

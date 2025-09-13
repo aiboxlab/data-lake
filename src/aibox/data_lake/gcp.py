@@ -48,10 +48,7 @@ class GCSBucket(Bucket):
             raise ValueError(f"Bucket '{bucket_name}' not found.")
 
     def list(self, prefix: str | None = None, glob: str | None = None) -> list[Blob]:
-        return [
-            GCSBlob(blob)
-            for blob in self._bucket.list_blobs(prefix=prefix, match_glob=glob)
-        ]
+        return [GCSBlob(blob) for blob in self._bucket.list_blobs(prefix=prefix, match_glob=glob)]
 
     def get(self, name: str) -> Blob:
         return GCSBlob(self._bucket.get_blob(name))

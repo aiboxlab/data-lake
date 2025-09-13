@@ -7,8 +7,8 @@ resolution-markers = [
 ]
 
 [[package]]
-name = "aibox-nlp"
-version = "0.0.1"
+name = "aibox-data-lake"
+version = "0.0.2"
 source = { editable = "." }
 dependencies = [
     { name = "google-cloud-storage" },

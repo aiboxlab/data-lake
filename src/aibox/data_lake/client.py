@@ -33,12 +33,10 @@ class Client:
     def __init__(self, config: Config | None = None):
         self._config = config if config is not None else Config()
         self._buckets = {
-            k: get_bucket(str(getattr(self.config, f"{k.value}_bucket")))
-            for k in BucketKind
+            k: get_bucket(str(getattr(self.config, f"{k.value}_bucket"))) for k in BucketKind
         }
         self._metadata = {
-            k: OpenMetadataJson.load_from_bucket(bucket)
-            for k, bucket in self._buckets.items()
+            k: OpenMetadataJson.load_from_bucket(bucket) for k, bucket in self._buckets.items()
         }
 
     @property

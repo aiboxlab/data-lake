@@ -3,7 +3,7 @@ da biblioteca.
 """
 
 import typer
-from rich.prompt import Confirm
+from rich.prompt import Confirm, Prompt
 
 from aibox.data_lake.config import Config
 from aibox.data_lake.factory import get_bucket
@@ -16,35 +16,30 @@ cli = typer.Typer(
 
 
 @cli.command(name="setup", help="Configura a biblioteca para primeiro uso.")
-def setup(
-    bronze_bucket: str = typer.Option(
-        help="URL do bucket nível bronze (e.g., gs://<bucket>)."
-    ),
-    silver_bucket: str = typer.Option(
-        help="URL do bucket nível prata (e.g., gs://<bucket>)."
-    ),
-    gold_bucket: str = typer.Option(
-        help="URL do bucket nível ouro (e.g., gs://<bucket>)."
-    ),
-):
+def setup():
     if Config.local_file_path().exists():
-        config = get_config()
+        try:
+            config = get_config()
+        except:
+            return -1
+
         console.print("[info]Configuração encontrada:[/]")
         console.print_json(config.model_dump_json(indent=2))
-        if not Confirm.ask(
-            "[warning]Deseja sobrescrever?[/]", console=console, default=True
-        ):
+        if not Confirm.ask("[warning]Deseja sobrescrever?[/]", console=console, default=True):
             console.print("[info]Configuração atual mantida.[/]")
             return
+
+    # Obtendo dados
+    bronze_bucket = Prompt.ask("[info]URL do bucket nível bronze[/]", console=console)
+    silver_bucket = Prompt.ask("[info]URL do bucket nível prata[/]", console=console)
+    gold_bucket = Prompt.ask("[info]URL do bucket nível ouro[/]", console=console)
 
     # Garantindo que os buckets são válidos
     for bucket in [bronze_bucket, silver_bucket, gold_bucket]:
         try:
             get_bucket(bucket)
         except Exception as e:
-            console.print(
-                f"[error]Não foi possível accesar o bucket '{bucket}': {e}[/]"
-            )
+            console.print(f"[error]Não foi possível accesar o bucket '{bucket}': {e}[/]")
             return -1
 
     # Criando nova configuração
@@ -64,7 +59,11 @@ def setup(
 def show():
     # Tenta carregar configurações
     if Config.local_file_path().exists():
-        config = get_config()
+        try:
+            config = get_config()
+        except:
+            return -1
+
         console.print_json(config.model_dump_json(indent=2))
         return
 
@@ -80,18 +79,19 @@ def validate():
         )
         return
 
-    config = get_config()
+    try:
+        config = get_config()
+    except:
+        return -1
+
     for bucket_url in [config.bronze_bucket, config.silver_bucket, config.gold_bucket]:
         bucket = str(bucket_url)
         try:
             get_bucket(bucket)
         except Exception as e:
+            console.print(f"[error]Não foi possível accesar o bucket '{bucket}': {e}[/]")
             console.print(
-                f"[error]Não foi possível accesar o bucket '{bucket}': {e}[/]"
-            )
-            console.print(
-                "[warning]Confirme que possui acesso ao bucket ou "
-                "atualize as configurações.[/]"
+                "[warning]Confirme que possui acesso ao bucket ou " "atualize as configurações.[/]"
             )
             return -1
 

@@ -53,9 +53,7 @@ class StructuredDataSource:
         """
         # Seleciona o método de carregamento
         load = (
-            pd.read_parquet
-            if self.metadata.structureFormat.lower() == "parquet"
-            else pd.read_csv
+            pd.read_parquet if self.metadata.structureFormat.lower() == "parquet" else pd.read_csv
         )
 
         # Carregamento de todos os blobs

@@ -58,11 +58,7 @@ class Blob(ABC):
         """
 
     def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}"
-            f"(name='{self.name}', bucket"
-            f"='{self.bucket.name}')"
-        )
+        return f"{self.__class__.__name__}" f"(name='{self.name}', bucket" f"='{self.bucket.name}')"
 
 
 class Bucket(ABC):

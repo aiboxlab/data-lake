@@ -6,9 +6,7 @@ from .bucket import cli as bucket
 from .config import cli as config
 from .metadata import cli as metadata
 
-cli = typer.Typer(
-    no_args_is_help=True, add_completion=False, help="CLI do AiBox Data Lake."
-)
+cli = typer.Typer(no_args_is_help=True, add_completion=False, help="CLI do AiBox Data Lake.")
 
 
 cli.add_typer(config, name="config")
