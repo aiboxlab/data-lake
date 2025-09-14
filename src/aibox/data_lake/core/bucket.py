@@ -31,7 +31,7 @@ class Blob(ABC):
         return self._name
 
     @abstractmethod
-    def download_to_local(self, directory: Path, overwrite: bool = False) -> Path:
+    def download_to_local(self, directory: Path | str, overwrite: bool = False) -> Path:
         """Realiza a transferência do objeto
         remoto para um arquivo local.
 

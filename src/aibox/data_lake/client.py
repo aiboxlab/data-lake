@@ -4,9 +4,16 @@ com o Data Lake.
 
 from enum import Enum
 
-from .config import Config
-from .core import Blob, Bucket, MetadataEntry, OpenMetadataJson, StructuredDataSource
-from .factory import get_bucket
+from aibox.data_lake.config import Config
+from aibox.data_lake.core import (
+    Blob,
+    Bucket,
+    MetadataEntry,
+    OpenMetadataJson,
+    SourceInfo,
+    StructuredDataSource,
+)
+from aibox.data_lake.factory import get_bucket
 
 
 class BucketKind(Enum):
@@ -76,6 +83,29 @@ class Client:
         bucket = self._maybe_convert_to_bucket(bucket)
         return bucket.list(prefix=prefix, glob=glob)
 
+    def list_data_sources(self, bucket: BucketKind | str) -> list[SourceInfo]:
+        """Lista todas as fontes de dados
+        estruturados presentes no bucket.
+
+        Args:
+            bucket: bucket para listagem das
+                fontes de dados. Aceita o
+                tipo do bucket como string
+                ou `BucketKind`.
+
+        Returns:
+            list[SourceInfo]: fontes de dados
+                disponíveis.
+        """
+        if isinstance(bucket, str):
+            bucket = BucketKind.from_str(bucket)
+
+        return [
+            SourceInfo.from_metadata(entry)
+            for entry in self.metadata[bucket].entries
+            if entry.structureFormat is not None
+        ]
+
     def load_structured_data_source(
         self, source: MetadataEntry | str, bucket: BucketKind | str
     ) -> StructuredDataSource:
@@ -85,7 +115,7 @@ class Client:
 
         Args:
             source: identificador da fonte de dados.
-                Pode ser o caminho para a fonte de
+                Pode ser o caminho/nome para a fonte de
                 dados como string ou um objeto de
                 metadados.
             bucket: bucket que contém a fonte de
@@ -104,7 +134,7 @@ class Client:
             target = None
 
             for entry in metadata.entries:
-                if entry.dataPath == source:
+                if entry.dataPath == source and entry.structureFormat is not None:
                     target = entry
                     break
 

@@ -19,3 +19,16 @@ Todas mudanças pertinentes a biblioteca serão documentadas aqui. O formato uti
 
 - Melhorias no CLI;
 - Adição de CHANGELOG;
+
+## [v0.0.3](https://github.com/aiboxlab/data-lake/releases/tag/v0.0.3) - 2025-09-14
+
+### Added
+
+- Novo método para listagem de fontes de dados disponíveis no sistema;
+    - Novo comando no CLI adicionado;
+
+### Fixed
+
+- Correção no carregamento de fontes dados: adição de sufixo `/` no `dataPath`;
+    - Nova modificação agora garante que apenas uma fonte de dados é selecionada;
+    - Anteriormente, caso existissem diferentes fontes de dados com mesmo prefixo ambas seriam selecionadas nos blobs;

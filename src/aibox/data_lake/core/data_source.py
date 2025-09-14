@@ -1,9 +1,29 @@
 """Fontes de dados."""
 
+import logging
+from typing import Literal
+
 import pandas as pd
+from pydantic import BaseModel
 
 from .bucket import Blob, Bucket
 from .openmetadata import MetadataEntry
+
+LOGGER = logging.getLogger(__name__)
+
+
+class SourceInfo(BaseModel):
+    name: str
+    partioned: bool
+    kind: Literal["structured", "unstructured"]
+
+    @classmethod
+    def from_metadata(cls, value: MetadataEntry) -> "SourceInfo":
+        return cls(
+            name=value.dataPath,
+            partioned=value.isPartitioned,
+            kind="structured" if value.structureFormat is not None else "unstructured",
+        )
 
 
 class StructuredDataSource:
@@ -22,15 +42,25 @@ class StructuredDataSource:
         if metadata.isPartitioned:
             raise ValueError("Partitioned data sources aren't supported.")
 
+        if metadata.depth != 0:
+            LOGGER.warning(
+                "Depth is currently ignored. All strucuted files "
+                "matching the expected type are loaded."
+            )
+
         self._metadata = metadata
         self._bucket = bucket
         self._blobs = self._bucket.list(
-            prefix=self._metadata.dataPath,
+            prefix=f"{self._metadata.dataPath}/",
             glob=f"**/*.{self._metadata.structureFormat}",
         )
 
         if not self._blobs:
             raise ValueError(f"Data source not found on bucket {self._bucket.name}.")
+
+    @property
+    def info(self) -> SourceInfo:
+        return SourceInfo.from_metadata(self.metadata)
 
     @property
     def metadata(self) -> MetadataEntry:

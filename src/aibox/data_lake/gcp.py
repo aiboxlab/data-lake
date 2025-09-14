@@ -27,7 +27,10 @@ class GCSBlob(Blob):
     def filename(self) -> str:
         return self.name.split("/")[-1]
 
-    def download_to_local(self, directory: Path, overwrite: bool = False) -> Path:
+    def download_to_local(self, directory: Path | str, overwrite: bool = False) -> Path:
+        if isinstance(directory, str):
+            directory = Path(directory)
+
         directory.mkdir(parents=True, exist_ok=True)
         fpath = directory.joinpath(self.filename())
         if fpath.exists() and not overwrite:
