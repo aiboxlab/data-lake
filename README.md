@@ -14,7 +14,7 @@
 
 # Quickstart
 
-The AiBox Data Lake Toolkit is a slim library that provides uniform access to Medallion Data Lakes, with [OpenMetadata](https://docs.open-metadata.org/latest/connectors/storage), on Cloud Providers (e.g., GCP). This library is developed for internal usage, but most of the source code and standards adopted are common for other purposes.
+The AiBox Data Lake Toolkit is a slim library that provides uniform access to Data Lakes on Cloud Providers (e.g., GCP). This library is developed for internal usage, but most of the source code and standards adopted are common for other purposes.
 
 The library can be installed with your favorite package manager:
 
@@ -24,9 +24,7 @@ uv pip install aibox-data-lake
 pip install aibox-data-lake
 ```
 
-Once installed, the library must be configured by running `aibox-dl config setup`. The CLI will prompt for the buckets URL, and validate that the cloud credentials are available, and the user has sufficient permission to read the buckets' and its contents. The cloud credentials are configured by the cloud client libraries (e.g., `google-cloud-storage`, `boto3`). The CLI provides other features such as listing objects, and reading the bucket metadata.
-
-The library is built on top of the [OpenMetadata JSON Manifest](https://docs.open-metadata.org/latest/connectors/storage), which describes the path and layout of data sources stored on a given bucket.
+Once installed, the library must be configured by running `aibox-dl config`. The library provides a simple registry for buckets (on any major cloud), which associates a bucket URL (e.g., `gs://my-bucket`) to a name (e.g., `bronze`). The cloud credentials must be configured by the cloud client libraries (e.g., `google-cloud-storage`, `boto3`). The CLI provides other features such as listing objects, and reading dataset metadata.
 
 The main class for programmatic access and manipulation of the Data Lake is the [aibox.data_lake.Client](./src/aibox/data_lake/client.py). This class provides methods for common operations on the Data Lake, such as reading specific files or loading datasets. Example usage:
 
@@ -39,13 +37,13 @@ client = Client()
 
 # List all objects present on the
 #   bronze-tier bucket
-client.list_objects("bronze")
+client.list_objects("<bucket-name>")
 
 # Loads a structured data source (e.g.,
 #   .parquet, .csv).
-ds = client.load_structured_data_source("<relative-path-to-root>", "bronze")
+ds = client.get_tabular_dataset("<bucket-name>", "<dataset-prefix>")
 
 # A structured data source can be easily
 #   loaded to a DataFrame
-ds.load()
+ds.to_frame()
 ```

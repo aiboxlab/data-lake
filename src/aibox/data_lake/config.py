@@ -1,30 +1,31 @@
 """Configurações da biblioteca."""
 
+import json
 from pathlib import Path
+from typing import Annotated
 
 import platformdirs
-from pydantic import AnyUrl
+from pydantic import AfterValidator, AnyUrl
 from pydantic_settings import BaseSettings, JsonConfigSettingsSource
 
 
 class BucketUrl(AnyUrl):
-    """Modelo que aceita URLs
-    de buckets.
-    """
+    allowed_schemes = ["s3", "gs"]
 
-    allowed_schemes = {"s3", "gs"}
+    @classmethod
+    def validate(cls, value: str) -> str:
+        cls(value)
+        return value
 
 
 class Config(BaseSettings):
     model_config = {"env_prefix": "AIBOX_DL_"}
 
-    bronze_bucket: BucketUrl
-    silver_bucket: BucketUrl
-    gold_bucket: BucketUrl
+    registered_buckets: dict[str, Annotated[str, AfterValidator(BucketUrl.validate)]]
 
     def save_to_file(self):
-        """Save current settings to the default
-        settings JSON location.
+        """Salva as configurações para o JSON
+        padrão.
         """
         path = self.local_file_path()
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -32,10 +33,11 @@ class Config(BaseSettings):
 
     @classmethod
     def local_file_path(cls) -> Path:
-        """Get the config local path.
+        """Obtém o caminho padrão das
+        configurações.
 
         Returns:
-            Path: path to configuration file.
+            Path: caminho para configuração.
         """
         return Path(platformdirs.user_config_dir(appname="data_lake", appauthor="aibox")).joinpath(
             "config.json"
@@ -50,10 +52,16 @@ class Config(BaseSettings):
         dotenv_settings,
         file_secret_settings,
     ):
-        # Precedence order
-        return (
-            init_settings,
-            JsonConfigSettingsSource(settings_cls, json_file=cls.local_file_path()),
-            env_settings,
-            file_secret_settings,
-        )
+        order = [init_settings, env_settings]
+        path = cls.local_file_path()
+        if path.exists():
+            try:
+                data = json.loads(path.read_text("utf-8"))
+                # Validate expected format for current version
+                if "registered_buckets" in data and len(data) == 1:
+                    order.append(JsonConfigSettingsSource(settings_cls, json_file=path))
+            except:
+                pass
+
+        order.append(file_secret_settings)
+        return tuple(order)

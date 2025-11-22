@@ -2,6 +2,7 @@
 básicas para o GCP.
 """
 
+from functools import cached_property
 from io import BytesIO
 from pathlib import Path
 
@@ -20,24 +21,25 @@ class GCSBlob(Blob):
     def bucket(self) -> Bucket:
         return GCSBucket(self._blob.bucket.name)
 
-    @property
+    @cached_property
     def name(self) -> str:
+        return super().name
+
+    @cached_property
+    def path(self) -> str:
         return self._blob.name
 
-    def filename(self) -> str:
-        return self.name.split("/")[-1]
+    @cached_property
+    def size(self) -> int:
+        return self._blob.size or 0
 
-    def download_to_local(self, directory: Path | str, overwrite: bool = False) -> Path:
-        if isinstance(directory, str):
-            directory = Path(directory)
+    def download_to_local(self, file_path: Path | str, overwrite: bool = False):
+        file_path = Path(file_path)
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        if file_path.exists() and not overwrite:
+            raise ValueError(f"File already exists: {file_path}.")
 
-        directory.mkdir(parents=True, exist_ok=True)
-        fpath = directory.joinpath(self.filename())
-        if fpath.exists() and not overwrite:
-            raise ValueError("File already exists: {fpath}.")
-
-        self._blob.download_to_filename(str(fpath), client=_CLIENT)
-        return fpath
+        self._blob.download_to_filename(str(file_path), client=_CLIENT)
 
     def as_stream(self) -> BytesIO:
         return BytesIO(self._blob.download_as_bytes(client=_CLIENT))

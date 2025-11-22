@@ -22,9 +22,14 @@ console = Console(
 def get_config() -> Config:
     try:
         return Config()
-    except (ValidationError, Exception) as e:
-        console.print(f"[error]Não foi possível carregar as configurações: {e}[/]")
-        raise
+    except ValidationError:
+        console.print(
+            "[error]Configuração de versões anteriores detectada. "
+            "Necessário realizar novo registro de buckets.[/]"
+        )
+        config = Config(registered_buckets=dict())
+        config.save_to_file()
+        return config
 
 
 def get_client() -> Client:

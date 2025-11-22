@@ -23,28 +23,44 @@ class Blob(ABC):
     @property
     @abstractmethod
     def bucket(self) -> "Bucket":
-        return self._bucket
+        """Bucket que contém
+        esse blob.
+        """
+
+    @property
+    def name(self) -> str:
+        """Nome do blob.
+
+        É a última parte do
+        caminho absoluto.
+        """
+        return self.path.rstrip("/").split("/")[-1]
 
     @property
     @abstractmethod
-    def name(self) -> str:
-        return self._name
+    def path(self) -> str:
+        """Caminho absoluto do
+        blob com relação a
+        raiz do bucket.
+        """
+
+    @property
+    @abstractmethod
+    def size(self) -> int:
+        """Tamanho total do blob
+        em bytes.
+        """
 
     @abstractmethod
-    def download_to_local(self, directory: Path | str, overwrite: bool = False) -> Path:
+    def download_to_local(self, file_path: Path | str, overwrite: bool = False):
         """Realiza a transferência do objeto
         remoto para um arquivo local.
 
         Args:
-            directory: caminho para o
-                diretório onde o objeto
-                deve ser armazenado.
+            file_path: caminho para o
+                salvamento do objeto.
             overwrite: se o arquivo deve
                 ser sobrescrito casa exista.
-
-        Returns:
-            Path: caminho para o objeto
-                localmente.
         """
 
     @abstractmethod
@@ -58,7 +74,7 @@ class Blob(ABC):
         """
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}" f"(name='{self.name}', bucket" f"='{self.bucket.name}')"
+        return f"{self.__class__.__name__}" f"(path='{self.path}', bucket" f"='{self.bucket.name}')"
 
 
 class Bucket(ABC):
