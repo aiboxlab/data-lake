@@ -44,6 +44,14 @@ class GCSBlob(Blob):
     def as_stream(self) -> BytesIO:
         return BytesIO(self._blob.download_as_bytes(client=_CLIENT))
 
+    def delete(self) -> bool:
+        try:
+            self._blob.delete(client=_CLIENT)
+        except:
+            return False
+
+        return True
+
 
 class GCSBucket(Bucket):
     def __init__(self, bucket_name: str):
@@ -51,6 +59,10 @@ class GCSBucket(Bucket):
         self._bucket = _CLIENT.bucket(bucket_name)
         if not self._bucket.exists():
             raise ValueError(f"Bucket '{bucket_name}' not found.")
+
+    @property
+    def uri(self) -> str:
+        return f"gs://{self._bucket.name}"
 
     def list(self, prefix: str | None = None, glob: str | None = None) -> list[Blob]:
         return [GCSBlob(blob) for blob in self._bucket.list_blobs(prefix=prefix, match_glob=glob)]

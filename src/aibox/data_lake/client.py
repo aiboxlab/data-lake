@@ -2,6 +2,8 @@
 com o Data Lake.
 """
 
+from typing import IO
+
 from aibox.data_lake.config import Config
 from aibox.data_lake.core import Blob, Bucket, TabularDataset
 from aibox.data_lake.factory import get_bucket
@@ -32,6 +34,20 @@ class Client:
     @property
     def buckets(self) -> dict[str, Bucket]:
         return self._buckets
+
+    def open_object(self, bucket: str, name: str, mode: str, **kwargs) -> IO:
+        """Abre um objeto no modo escolhido.
+
+        Args:
+            bucket: nome do bucket registrado.
+            name: nome do objeto.
+            mode: modo de abertura.
+            **kwargs: parâmetros extras.
+
+        Returns:
+            IO: file object.
+        """
+        return self._buckets[bucket].open(name, mode, **kwargs)
 
     def list_objects(
         self,
