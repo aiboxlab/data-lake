@@ -68,4 +68,7 @@ class GCSBucket(Bucket):
         return [GCSBlob(blob) for blob in self._bucket.list_blobs(prefix=prefix, match_glob=glob)]
 
     def get(self, name: str) -> Blob:
-        return GCSBlob(self._bucket.get_blob(name))
+        blob = self._bucket.get_blob(name)
+        if blob is not None:
+            return GCSBlob(blob)
+        return None
