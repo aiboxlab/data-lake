@@ -5,6 +5,9 @@ buckets.
 from abc import ABC, abstractmethod
 from io import BytesIO
 from pathlib import Path
+from typing import IO
+
+from smart_open import open
 
 
 class Blob(ABC):
@@ -73,6 +76,30 @@ class Blob(ABC):
                 objeto.
         """
 
+    @abstractmethod
+    def delete(self) -> bool:
+        """Remove esse objeto do
+        bucket remoto.
+
+        Returns:
+            bool: True se a deleção
+                foi um sucesso, False
+                do contrário.
+        """
+
+    def open(self, mode: str, **kwargs) -> IO:
+        """Abre esse objeto.
+
+        Args:
+            mode: modo de abertura.
+            **kwargs: parâmetros extras a serem
+                passados para smart_open.open(...).
+
+        Returns:
+            IO: file object.
+        """
+        return self.bucket.open(self.name, mode, **kwargs)
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}" f"(path='{self.path}', bucket" f"='{self.bucket.name}')"
 
@@ -87,6 +114,17 @@ class Bucket(ABC):
 
     def __init__(self, bucket_name: str):
         self._name = bucket_name
+
+    @property
+    @abstractmethod
+    def uri(self) -> str:
+        """URI do bucket.
+
+        Returns:
+            str: identificador do bucket
+                com o schema (e.g., s3://,
+                gs://).
+        """
 
     @property
     def name(self) -> str:
@@ -110,16 +148,50 @@ class Bucket(ABC):
         """
 
     @abstractmethod
-    def get(self, name: str) -> Blob:
+    def get(self, name: str) -> Blob | None:
         """Obtém um objeto no bucket
         com o nome passado.
+
+        Caso o objeto não existe, retorna
+        None.
 
         Args:
             name: nome do objeto.
 
         Returns:
-            Blob: objeto.
+            Blob: objeto ou None..
         """
+
+    def exists(self, name: str) -> bool:
+        """Checa se o objeto com o nome
+        passado existe no bucket.
+
+        Args:
+            name: nome do objeto.
+
+        Returns:
+            bool: True se existe, False
+                caso contrário.
+        """
+        return self.get(name) is not None
+
+    def open(self, name: str, mode: str, **kwargs) -> IO:
+        """Abre um objeto no bucket.
+
+        Retorna um objeto igual ao retornado
+        por open(...).
+
+        Args:
+            name: nome do objeto.
+            mode: modo de abertura.
+            **kwargs: parâmetros extras a serem
+                passados para smart_open.open(...).
+
+        Returns:
+            IO: file object.
+        """
+        path = "/".join([self.uri, name])
+        return open(path, mode=mode, **kwargs)
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(name='{self.name}')"
