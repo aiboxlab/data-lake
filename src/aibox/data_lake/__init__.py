@@ -1,6 +1,7 @@
 import logging.config
 
 from .client import Client
+from .factory import get_bucket
 
 LOGGING_CONFIG = {
     "version": 1,
