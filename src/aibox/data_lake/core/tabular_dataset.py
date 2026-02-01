@@ -1,7 +1,9 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import cached_property
 from pathlib import Path
 
 import pandas as pd
+from tqdm.auto import tqdm
 
 from .bucket import Blob, Bucket
 from .dataset import Dataset, DatasetInfo
@@ -28,7 +30,13 @@ class TabularDataset(Dataset):
     são tratados como parte do mesmo dataset.
     """
 
-    def __init__(self, bucket: Bucket, prefix: str, extension: str = "parquet"):
+    def __init__(
+        self,
+        bucket: Bucket,
+        prefix: str,
+        extension: str = "parquet",
+        n_parallel_download: int = 16,
+    ):
         if extension not in {"parquet", "csv"}:
             raise ValueError(f"Extension format not supported: '{extension}'.")
 
@@ -39,6 +47,7 @@ class TabularDataset(Dataset):
             prefix=f"{self._prefix}/",
             glob=f"**/*.{self._extension}",
         )
+        self._n_parallel = max(1, n_parallel_download)
 
         if not self._blobs:
             raise ValueError(f"Data source not found on bucket {self._bucket.name}.")
@@ -76,9 +85,19 @@ class TabularDataset(Dataset):
         if next(directory.rglob("*"), None) is not None and not overwrite:
             raise ValueError("Directory not empty.")
 
-        for b in self.blobs:
-            file_path = directory.join(b.path.replace(f"{self._prefix}/"))
-            b.download_to_local(file_path, overwrite=True)
+        with ThreadPoolExecutor(max_workers=self._n_parallel) as executor:
+            futures = [
+                executor.submit(self._download_to_local, blob, directory, self._prefix)
+                for blob in self.blobs
+            ]
+
+            for _ in tqdm(as_completed(futures), total=len(futures)):
+                continue
+
+    @staticmethod
+    def _download_to_local(blob: Blob, directory: Path, prefix: str):
+        file_path = directory.joinpath(blob.path.replace(f"{prefix}/", ""))
+        blob.download_to_local(file_path, overwrite=True)
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(name='{self.info.name}', bucket='{self.info.bucket}')"
