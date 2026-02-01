@@ -32,17 +32,17 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "google-cloud-storage", specifier = ">=3.3.1" },
-    { name = "ibis-framework", extras = ["duckdb"], specifier = ">=11.0.0" },
-    { name = "pandas", specifier = ">=2.3.2" },
-    { name = "platformdirs", specifier = ">=4.4.0" },
-    { name = "pyarrow", specifier = ">=21.0.0" },
-    { name = "pydantic", specifier = ">=2.11.7" },
-    { name = "pydantic-settings", specifier = ">=2.10.1" },
-    { name = "rich", specifier = ">=14.1.0" },
-    { name = "smart-open", extras = ["all"], specifier = ">=7.3.1" },
-    { name = "typer", specifier = ">=0.17.4" },
-    { name = "uv", specifier = ">=0.8.15" },
+    { name = "google-cloud-storage", specifier = ">=3.3.1,<4" },
+    { name = "ibis-framework", extras = ["duckdb"], specifier = ">=11.0.0,<12" },
+    { name = "pandas", specifier = ">=2.3.2,<3" },
+    { name = "platformdirs", specifier = ">=4.4.0,<5" },
+    { name = "pyarrow", specifier = ">=21.0.0,<22" },
+    { name = "pydantic", specifier = ">=2.11.7,<3" },
+    { name = "pydantic-settings", specifier = ">=2.10.1,<3" },
+    { name = "rich", specifier = ">=14.1.0,<15" },
+    { name = "smart-open", extras = ["all"], specifier = ">=7.3.1,<8" },
+    { name = "typer", specifier = ">=0.17.4,<1" },
+    { name = "uv", specifier = ">=0.8.15,<1" },
 ]
 
 [package.metadata.requires-dev]
