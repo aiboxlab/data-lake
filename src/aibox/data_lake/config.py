@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Annotated
 
 import platformdirs
-from pydantic import AfterValidator, AnyUrl
+from pydantic import AfterValidator, AnyUrl, Field
 from pydantic_settings import BaseSettings, JsonConfigSettingsSource
 
 
@@ -21,7 +21,9 @@ class BucketUrl(AnyUrl):
 class Config(BaseSettings):
     model_config = {"env_prefix": "AIBOX_DL_"}
 
-    registered_buckets: dict[str, Annotated[str, AfterValidator(BucketUrl.validate)]]
+    registered_buckets: dict[str, Annotated[str, AfterValidator(BucketUrl.validate)]] = Field(
+        default_factory=dict
+    )
 
     def save_to_file(self):
         """Salva as configurações para o JSON

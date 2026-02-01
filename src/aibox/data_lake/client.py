@@ -13,7 +13,6 @@ class Client:
     """Classe para interação com
     o Data Lake.
 
-
     Permite acessar todas as funcionalidades
     do Data Lake, incluindo o carregamento
     de datasets, listagem de objetos, gerenciamento
@@ -39,7 +38,9 @@ class Client:
         """Abre um objeto no modo escolhido.
 
         Args:
-            bucket: nome do bucket registrado.
+            bucket: nome de bucket registrado
+                ou URL (e.g., s3://bucket,
+                gs://bucket).
             name: nome do objeto.
             mode: modo de abertura.
             **kwargs: parâmetros extras.
@@ -47,7 +48,7 @@ class Client:
         Returns:
             IO: file object.
         """
-        return self._buckets[bucket].open(name, mode, **kwargs)
+        return self._get_bucket(bucket).open(name, mode, **kwargs)
 
     def list_objects(
         self,
@@ -60,7 +61,9 @@ class Client:
         que satisfaçam os filtros.
 
         Args:
-            bucket: nome do bucket registrado.
+            bucket: nome de bucket registrado
+                ou URL (e.g., s3://bucket,
+                gs://bucket).
             prefix: prefixo dos objetos.
             glob: glob para match de objetos.
 
@@ -68,7 +71,7 @@ class Client:
             list[Blob]: objetos que satisfazem
                 os filtros.
         """
-        return self.buckets[bucket].list(prefix=prefix, glob=glob)
+        return self._get_bucket(bucket).list(prefix=prefix, glob=glob)
 
     def get_tabular_dataset(
         self,
@@ -81,7 +84,9 @@ class Client:
         e o bucket.
 
         Args:
-            bucket: nome do bucket registrado.
+            bucket: nome de bucket registrado
+                ou URL (e.g., s3://bucket,
+                gs://bucket).
             dataset_prefix: prefixo dos dados para
                 o dataset no bucket.
             extension: extensão dos dados do dataset.
@@ -89,5 +94,10 @@ class Client:
         Returns:
             TabularDataset: dataset tabular.
         """
+        return TabularDataset(self._get_bucket(bucket), dataset_prefix, extension)
 
-        return TabularDataset(self.buckets[bucket], dataset_prefix, extension)
+    def _get_bucket(self, bucket: str) -> Bucket:
+        try:
+            return self.buckets[bucket]
+        except KeyError:
+            return get_bucket(bucket)
