@@ -21,9 +21,16 @@ def get_bucket(bucket_url: str) -> Bucket:
         ValueError: se a URL não
             é suportada.
     """
-    if bucket_url.startswith("gs://"):
+    prefix = "gs://"
+    if bucket_url.startswith(prefix):
         from .gcp import GCSBucket
 
-        return GCSBucket(bucket_url.lstrip("gs://"))
+        return GCSBucket(bucket_url.lstrip(prefix))
+
+    prefix = "s3://"
+    if bucket_url.startswith(prefix):
+        from .s3 import S3Bucket
+
+        return S3Bucket(bucket_url.lstrip(prefix))
 
     raise ValueError(f"Unsupported bucket URL: '{bucket_url}'")
