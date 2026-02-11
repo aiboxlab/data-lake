@@ -11,6 +11,7 @@ name = "aibox-data-lake"
 version = "1.2.0"
 source = { editable = "." }
 dependencies = [
+    { name = "boto3" },
     { name = "google-cloud-storage" },
     { name = "ibis-framework", extra = ["duckdb"] },
     { name = "pandas" },
@@ -33,6 +34,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "boto3", specifier = ">=1.40.25" },
     { name = "google-cloud-storage", specifier = ">=3.3.1,<4" },
     { name = "ibis-framework", extras = ["duckdb"], specifier = ">=11.0.0,<12" },
     { name = "pandas", specifier = ">=2.3.2,<3" },
